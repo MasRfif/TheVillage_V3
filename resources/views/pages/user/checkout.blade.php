@@ -63,7 +63,7 @@
         </form>
 
         <aside class="card checkout-summary">
-            <img src="{{ asset('assets/' . rawurlencode($event['image'])) }}" alt="{{ $event['nama_event'] }}">
+            <x-event-image :event="$event" />
             <div style="padding:1rem">
                 <h2 style="font-weight:900;font-size:1rem;margin-bottom:.25rem">{{ $event['nama_event'] }}</h2>
                 <p class="muted" style="font-size:.82rem;margin-bottom:1rem">{{ $ticket['nama_tiket'] }} × {{ $qty }}</p>

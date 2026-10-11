@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Data\VillageData;
+use App\Models\Tiket;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -27,13 +28,13 @@ class UserController extends Controller
     {
         if (!session('user')) return $this->perluLogin();
 
-        $found = VillageData::ticket($ticketId);
-        abort_if(!$found, 404);
+        $ticket = Tiket::with('acara')->find($ticketId);
+        abort_if(!$ticket, 404);
 
         return view('pages.user.checkout', [
-            'event' => $found['event'],
-            'ticket' => $found['ticket'],
-            'qty' => max(1, (int) $request->query('qty', 1)),
+            'event' => $ticket->acara,
+            'ticket' => $ticket,
+            'qty' => max(1, min((int) $request->query('qty', 1), $ticket->qty)),
             'methods' => VillageData::paymentMethods(),
             'user' => session('user'),
         ]);
@@ -43,26 +44,28 @@ class UserController extends Controller
     {
         if (!session('user')) return $this->perluLogin();
 
+        $ticket = Tiket::with('acara')->find($ticketId);
+        abort_if(!$ticket, 404);
+
         $data = $request->validate([
             'nama_pendaftar' => 'required',
             'email' => 'required|email',
             'no_hp' => 'required',
             'catatan' => 'nullable',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required|integer|min:1|max:' . $ticket->qty,
             'id_payment_method' => 'required|integer',
+        ], [
+            'qty.max' => 'Jumlah melebihi sisa tiket (' . $ticket->qty . ').',
         ]);
-
-        $found = VillageData::ticket($ticketId);
-        abort_if(!$found, 404);
 
         $semua = session('transactions', []);
         $id = 100 + count($semua) + 1;
-        $total = $found['ticket']['harga'] * $data['qty'];
+        $total = $ticket->harga * $data['qty'];
 
         array_unshift($semua, [
             'id' => $id, 'tanggal' => now()->toDateTimeString(),
             'status' => $total == 0 ? 'GRATIS' : 'PENDING', 'total' => $total,
-            'nama_event' => $found['event']['nama_event'], 'nama_tiket' => $found['ticket']['nama_tiket'],
+            'nama_event' => $ticket->acara->nama_event, 'nama_tiket' => $ticket->nama_tiket,
             'jumlah' => (int) $data['qty'], 'metode' => (int) $data['id_payment_method'],
             'kode' => 'PAY-' . str_pad($id, 4, '0', STR_PAD_LEFT),
             'pendaftar' => $data,

@@ -5,8 +5,8 @@
 @section('content')
 <div class="container" style="padding-top:1.5rem">
 
-    {{-- Hero --}}
     <div class="hero-section" style="margin-bottom:2rem">
+       
         <div class="hero-content">
             <div class="row" style="margin-bottom:1rem">
                 <i data-lucide="flame" class="ic-14" style="color:var(--orange)"></i>

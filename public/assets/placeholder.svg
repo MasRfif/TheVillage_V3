@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Gambar tidak tersedia">
+  <rect width="800" height="500" fill="#2a2420"/>
+  <g fill="none" stroke="#c85c00" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity=".9">
+    <path d="M290 305 L400 205 L510 305"/>
+    <path d="M320 285 V350 H480 V285"/>
+    <path d="M382 350 V308 H418 V350"/>
+  </g>
+  <text x="400" y="408" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#a89888">Gambar tidak tersedia</text>
+  <text x="400" y="442" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#7a6e63">The Village</text>
+</svg>

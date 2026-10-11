@@ -9,7 +9,7 @@
     <div class="detail-layout">
         {{-- Kiri: informasi acara --}}
         <div>
-            <img class="detail-hero-img" src="{{ asset('assets/' . rawurlencode($event['image'])) }}" alt="{{ $event['nama_event'] }}">
+            <x-event-image :event="$event" class="detail-hero-img" />
 
             <div class="card" style="margin-top:1.25rem;overflow:hidden">
                 <div class="detail-section">

@@ -5,7 +5,7 @@
 @endphp
 
 <a href="{{ route('events.show', $event['id']) }}" class="event-card" style="display:block">
-    <img src="{{ asset('assets/' . rawurlencode($event['image'])) }}" alt="{{ $event['nama_event'] }}">
+    <x-event-image :event="$event" />
     <div class="event-card-body">
         <span class="badge">{{ $event['nama_category'] }}</span>
         <div class="event-card-title" style="margin-top:.55rem">{{ $event['nama_event'] }}</div>

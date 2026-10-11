@@ -5,7 +5,9 @@
 
 @section('content')
 <div class="splash-page" style="position:relative">
-    <div class="splash-bg"></div>
+    <div class="splash-bg">
+        <img src="{{ asset('assets/desa_splash.jpg') }}" alt="Splash Image" style="width:100%;height:100%;object-fit:cover;object-position:center">
+    </div>
 
     <div class="splash-wrap">
         <span style="font-size:.78rem;font-weight:800;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;background:var(--panel2);padding:.35rem 1rem;border-radius:999px;border:1px solid var(--border)">

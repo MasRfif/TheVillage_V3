@@ -26,6 +26,10 @@
                     <input class="input" id="password" type="password" name="password" placeholder="••••••••" required>
                     @error('password') <div class="err">{{ $message }}</div> @enderror
                 </div>
+                <label style="display:flex;align-items:center;gap:.5rem;font-size:.84rem;color:var(--muted)">
+                    <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                    Ingat saya
+                </label>
                 <button type="submit" class="btn btn-primary" style="width:100%;min-height:48px">Masuk</button>
             </form>
 

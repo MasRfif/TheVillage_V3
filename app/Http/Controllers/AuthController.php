@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Data\VillageData;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -23,21 +24,24 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        $user = VillageData::users()[$data['email']] ?? null;
-
-        if (!$user || $data['password'] !== 'password') {
-            return back()->withInput($request->only('email'))->with('error', 'Email atau password salah.');
+        if (!Auth::attempt($data, $request->boolean('remember'))) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Email atau password salah.']);
         }
 
-        session(['user' => $user]);
+        $request->session()->regenerate();
+        $user = Auth::user();
+        abort_unless($user instanceof User, 500);
+        $this->syncLegacyUserSession($user);
 
-        $tujuan = match ($user['nama_role']) {
+        $tujuan = match ($user->role) {
             'ADMIN_BG' => 'admin.dashboard',
             'PENYELENGGARA' => 'organizer.dashboard',
             default => 'home',
         };
 
-        return redirect()->route($tujuan)->with('success', 'Berhasil masuk!');
+        return to_route($tujuan)->with('success', 'Berhasil masuk!');
     }
 
     public function showRegister(Request $request)
@@ -48,27 +52,48 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'nama_awal' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:6',
+            'nama_awal' => 'required|string|max:100',
+            'nama_akhir' => 'nullable|string|max:100',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|confirmed|min:8',
         ]);
 
-        $role = $request->input('role', 'USER');
-        session(['user' => [
-            'nama_awal' => $data['nama_awal'],
-            'nama_akhir' => $request->input('nama_akhir', ''),
+        $role = $request->input('role') === 'PENYELENGGARA' ? 'PENYELENGGARA' : 'USER';
+        $user = User::create([
+            'name' => trim($data['nama_awal'] . ' ' . ($data['nama_akhir'] ?? '')),
             'email' => $data['email'],
-            'nama_role' => $role,
-        ]]);
+            'password' => $data['password'],
+            'role' => $role,
+        ]);
 
-        return redirect()
-            ->route($role === 'PENYELENGGARA' ? 'organizer.dashboard' : 'home')
+        Auth::login($user);
+        $request->session()->regenerate();
+        $this->syncLegacyUserSession($user);
+
+        return to_route($role === 'PENYELENGGARA' ? 'organizer.dashboard' : 'home')
             ->with('success', 'Registrasi berhasil! Selamat datang 🎉');
     }
 
     public function logout(Request $request)
     {
-        $request->session()->forget('user');
-        return redirect()->route('splash')->with('success', 'Kamu sudah keluar.');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return to_route('splash')->with('success', 'Kamu sudah keluar.');
+    }
+
+    private function syncLegacyUserSession(User $user): void
+    {
+        $name = preg_split('/\s+/', trim($user->name), 2);
+
+        session(['user' => [
+            'id' => $user->id,
+            'nama_awal' => $name[0] ?? $user->name,
+            'nama_akhir' => $name[1] ?? '',
+            'name' => $user->name,
+            'email' => $user->email,
+            'nama_role' => $user->role,
+        ]]);
     }
 }

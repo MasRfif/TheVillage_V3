@@ -45,7 +45,7 @@ Versi aslinya dibangun dengan **React + Vite** pada sisi frontend dan **PHP Nati
 > Proyek dikembangkan sebagai **Tugas Besar Mata Kuliah Pemrograman Web** oleh Kelompok 3, Program Studi Terapan Sistem Informasi Kota Cerdas, Fakultas Ilmu Terapan, Universitas Telkom.
 
 > [!IMPORTANT]
-> Versi ini fokus pada **penerapan Blade Template**. Data ditampilkan dari data contoh di `app/Data/VillageData.php` (bersumber dari `the_village.sql`) dan login memakai *session* demo, **tanpa database**. Integrasi MySQL penuh ada pada repositori versi React + PHP API.
+> Versi ini menggunakan **Blade Template**, autentikasi Laravel berbasis database, dan session Laravel. Data event pendukung tetap tersedia melalui `app/Data/VillageData.php`, sedangkan akun pengguna disimpan pada tabel `users` menggunakan koneksi database dari `.env`.
 
 ---
 
@@ -113,8 +113,8 @@ Directive kustom tambahan: `@rupiah($angka)` dan `@tanggal($tgl, 'format')` (did
 |---|---|---|
 | Tampilan | Komponen React (JSX), SPA | Blade View, dirender di server |
 | Routing | React Router (sisi klien) | `routes/web.php` dengan named route |
-| Data | REST API + MySQL | Data contoh di `app/Data/VillageData.php` |
-| Autentikasi | Token API | Session Laravel (demo) |
+| Data | REST API + MySQL | Eloquent dan data pendukung `app/Data/VillageData.php` |
+| Autentikasi | Token API | Laravel Auth, database, dan session |
 | Styling | CSS + Tailwind | CSS biasa (`public/css/app.css`) |
 | Ikon | Lucide React | Lucide (CDN) |
 | Interaksi | State React | JavaScript ringan (`public/js/app.js`) dan form HTML |
@@ -174,7 +174,7 @@ Directive kustom tambahan: `@rupiah($angka)` dan `@tanggal($tgl, 'format')` (did
 flowchart LR
     U[Pengguna] -->|HTTP Request| R[routes/web.php]
     R --> C[Controller]
-    C --> D[VillageData / Session]
+    C --> D[Database / VillageData / Session]
     D --> C
     C -->|data| V[Blade View]
     V --> L[layouts/app.blade.php]
@@ -186,7 +186,7 @@ flowchart LR
 
 1. Pengguna membuka URL atau menekan tautan (menggunakan `route('nama')`).
 2. `routes/web.php` meneruskan request ke controller yang sesuai.
-3. Controller mengambil data dari `VillageData` atau session, serta memvalidasi input form.
+3. Controller mengambil data dari database, `VillageData`, atau session, serta memvalidasi input form.
 4. Controller mengirim data ke Blade View melalui `view('nama.view', $data)`.
 5. View mewarisi `layouts.app`, mengisi `@section('content')`, dan memakai komponen/partial.
 6. Laravel mengirim HTML hasil render ke browser.
@@ -246,14 +246,14 @@ the-village/
 - Git.
 - Koneksi internet (untuk ikon Lucide dan font dari CDN).
 
-> Tidak memerlukan XAMPP maupun MySQL.
+> Project menggunakan database yang dikonfigurasi pada `.env`. XAMPP, Laragon, atau server MySQL/MariaDB lain dapat digunakan.
 
 <details>
 <summary><strong>1. Clone repositori</strong></summary>
 
 ```bash
-git clone https://github.com/MasRfif/NAMA-REPOSITORY-INI.git
-cd NAMA-REPOSITORY-INI
+git clone https://github.com/MasRfif/TheVillage_V3.git
+cd TheVillage_V3
 ```
 
 </details>
@@ -283,9 +283,15 @@ Pastikan `.env` berisi:
 ```env
 APP_NAME="The Village"
 SESSION_DRIVER=file
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=db_thevillage
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-`SESSION_DRIVER=file` diperlukan agar login demo dan transaksi (disimpan di session) berjalan tanpa tabel database.
+Sesuaikan nilai `DB_*` dengan database lokal Anda. `SESSION_DRIVER=file` menyimpan session login pada file lokal, sedangkan data akun tetap tersimpan di database.
 
 </details>
 
@@ -301,7 +307,19 @@ Tanpa langkah ini aplikasi akan menampilkan `MissingAppKeyException`.
 </details>
 
 <details>
-<summary><strong>5. Jalankan aplikasi</strong></summary>
+<summary><strong>5. Migrasi dan isi data awal</strong></summary>
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+Seeder membuat data aplikasi dan akun pengguna demo dengan password yang sudah di-hash.
+
+</details>
+
+<details>
+<summary><strong>6. Jalankan aplikasi</strong></summary>
 
 ```bash
 php artisan serve
@@ -334,7 +352,7 @@ Password seluruh akun: `password`
 | Masyarakat | `user@village.test` | Beranda |
 
 > [!WARNING]
-> Akun tersebut hanya untuk demonstrasi. Autentikasi pada versi ini berbasis session demo dan tidak untuk lingkungan produksi.
+> Akun tersebut hanya untuk demonstrasi. Password disimpan menggunakan hashing Laravel, tetapi tetap ganti kredensial demo sebelum deployment produksi.
 
 ---
 
@@ -431,7 +449,7 @@ Seluruh hasil tetap diperiksa, disesuaikan, dan diuji kembali oleh anggota kelom
 ## Catatan Keamanan
 
 - File `.env` **tidak** disertakan di repositori. Gunakan `.env.example` lalu jalankan `php artisan key:generate`.
-- Login pada versi ini hanya demo (session, tanpa database) dan tidak untuk produksi.
+- Autentikasi menggunakan guard `web`, tabel `users`, password hashing, dan session Laravel.
 - Seluruh form memakai `@csrf` untuk perlindungan CSRF.
 - Keluaran data memakai `{{ }}` sehingga otomatis di-escape terhadap XSS.
 

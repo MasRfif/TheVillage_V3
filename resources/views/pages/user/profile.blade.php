@@ -14,6 +14,9 @@
             <h2 style="font-weight:900;font-size:1.3rem;margin-bottom:.25rem">{{ session('user.nama_awal') }} {{ session('user.nama_akhir') }}</h2>
             <div class="muted" style="font-size:.88rem">{{ session('user.email') }}</div>
             <span class="badge" style="margin-top:.5rem">{{ session('user.nama_role') }}</span>
+            <div class="dim" style="font-size:.78rem;margin-top:.45rem">
+                Bergabung {{ auth()->user()->created_at?->diffForHumans() }}
+            </div>
         </div>
         <div style="display:flex;gap:1.5rem">
             <div style="text-align:center">

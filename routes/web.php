@@ -24,11 +24,15 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.su
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ── Halaman pengguna (wajib login) ──
-Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-Route::get('/checkout/{ticketId}', [UserController::class, 'checkout'])->whereNumber('ticketId')->name('checkout.show');
-Route::post('/checkout/{ticketId}', [UserController::class, 'checkoutStore'])->whereNumber('ticketId')->name('checkout.store');
-Route::get('/invoice/{id}', [UserController::class, 'invoice'])->whereNumber('id')->name('invoice.show');
+Route::middleware('auth')->group(function () {
+	Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+	Route::get('/checkout/{ticketId}', [UserController::class, 'checkout'])->whereNumber('ticketId')->name('checkout.show');
+	Route::post('/checkout/{ticketId}', [UserController::class, 'checkoutStore'])->whereNumber('ticketId')->name('checkout.store');
+	Route::get('/invoice/{id}', [UserController::class, 'invoice'])->whereNumber('id')->name('invoice.show');
+});
 
 // ── Dashboard ──
-Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
-Route::get('/organizer', [DashboardController::class, 'organizer'])->name('organizer.dashboard');
+Route::middleware('auth')->group(function () {
+	Route::get('/admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
+	Route::get('/organizer', [DashboardController::class, 'organizer'])->name('organizer.dashboard');
+});

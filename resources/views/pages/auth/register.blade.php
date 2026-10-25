@@ -47,8 +47,12 @@
                 </div>
                 <div>
                     <label class="input-label">Password</label>
-                    <input class="input" type="password" name="password" placeholder="Minimal 6 karakter" required>
+                    <input class="input" type="password" name="password" placeholder="Minimal 8 karakter" required>
                     @error('password') <div class="err">{{ $message }}</div> @enderror
+                </div>
+                <div>
+                    <label class="input-label">Konfirmasi Password</label>
+                    <input class="input" type="password" name="password_confirmation" placeholder="Ulangi password" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width:100%;min-height:48px">Daftar</button>

@@ -291,7 +291,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Sesuaikan nilai `DB_*` dengan database lokal Anda. `SESSION_DRIVER=file` menyimpan session login pada file lokal, sedangkan data akun tetap tersimpan di database.
+Buat database kosong bernama `db_thevillage` melalui phpMyAdmin sebelum menjalankan migration. Pada konfigurasi XAMPP standar, user MySQL adalah `root` tanpa password sehingga `DB_PASSWORD` dikosongkan. Jika MySQL XAMPP Anda memakai password root, isi `DB_PASSWORD` dengan password tersebut. `SESSION_DRIVER=file` menyimpan session login pada file lokal, sedangkan data akun tetap tersimpan di database.
 
 </details>
 
@@ -310,8 +310,10 @@ Tanpa langkah ini aplikasi akan menampilkan `MissingAppKeyException`.
 <summary><strong>5. Migrasi dan isi data awal</strong></summary>
 
 ```bash
+php artisan config:clear
 php artisan migrate
 php artisan db:seed
+php artisan storage:link
 ```
 
 Seeder membuat data aplikasi dan akun pengguna demo dengan password yang sudah di-hash.
@@ -380,6 +382,18 @@ Password seluruh akun: `password`
 | `GET` | `/register` | `register` | Form registrasi (`?role=PENYELENGGARA`) |
 | `POST` | `/register` | `register.submit` | Proses registrasi |
 | `POST` | `/logout` | `logout` | Keluar |
+
+### Event Desa (admin, wajib login)
+
+| Method | URI | Nama Route | Keterangan |
+|---|---|---|---|
+| `GET` | `/event-villages` | `event-villages.index` | Daftar event desa |
+| `GET` | `/event-villages/create` | `event-villages.create` | Form tambah event |
+| `POST` | `/event-villages` | `event-villages.store` | Simpan event dan poster |
+| `GET` | `/event-villages/{event_village}` | `event-villages.show` | Detail event |
+| `GET` | `/event-villages/{event_village}/edit` | `event-villages.edit` | Form edit event |
+| `PUT/PATCH` | `/event-villages/{event_village}` | `event-villages.update` | Perbarui event dan poster |
+| `DELETE` | `/event-villages/{event_village}` | `event-villages.destroy` | Hapus event dan poster |
 
 ### Pengguna (wajib login)
 
